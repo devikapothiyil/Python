@@ -81,5 +81,3 @@ detail = Label(top, text="Result:")
 detail.place(x=50, y=200)
 
 top.mainloop()
-
-top.mainloop()
