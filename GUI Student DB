@@ -1,0 +1,123 @@
+from tkinter import *
+import mysql.connector
+
+# Connect to MySQL database
+mydb = mysql.connector.connect(
+    host='localhost',
+    user='root',
+    password='Devika@123#',
+    database='anumol'
+)
+
+# Create Tkinter window
+win = Tk()
+win.geometry('375x300+250+100')
+win.title("DATABASE APPLICATION")
+
+# Function to insert data into MySQL
+def insert_data():
+    reg_no = reg.get()
+    nam = name.get()
+    mycursor = mydb.cursor()
+
+    try:
+        sql = "INSERT INTO student (reg_no, name) VALUES (%s, %s)"
+        val = (reg_no, nam)
+        mycursor.execute(sql, val)
+        mydb.commit()
+        print('Data Inserted')
+        reg.delete(0, END)
+        name.delete(0, END)
+        reg.focus_set()
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+
+# Function to display all data from MySQL
+def show_data():
+    mycursor = mydb.cursor()
+    mycursor.execute("SELECT * FROM student")
+    myresult = mycursor.fetchall()
+
+    for x in myresult:
+        print(x)
+
+# Function to search for data in MySQL
+def search_data():
+    r = reg.get()
+    mycursor = mydb.cursor()
+
+    try:
+        mycursor.execute("SELECT name FROM student WHERE reg_no = %s", (r,))
+        myresult = mycursor.fetchone()
+
+        if myresult:
+            name.delete(0, 'end')
+            name.insert(0, myresult[0])
+            print(myresult[0])
+        else:
+            name.delete(0, 'end')
+            name.insert(0, "notfound")
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+
+# Function to update data in MySQL
+def edit_data():
+    reg_no = reg.get()
+    nam = name.get()
+    mycursor = mydb.cursor()
+
+    try:
+        sql = "UPDATE student SET name = %s WHERE reg_no = %s"
+        val = (nam, reg_no)
+        mycursor.execute(sql, val)
+        mydb.commit()
+        print(mycursor.rowcount, "record(s) affected")
+        reg.delete(0, END)
+        name.delete(0, END)
+        reg.focus_set()
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+
+# Function to delete data from MySQL
+def delete_data():
+    reg_no = reg.get()
+    mycursor = mydb.cursor()
+
+    try:
+        sql = "DELETE FROM student WHERE reg_no = %s"
+        val = (reg_no,)
+        mycursor.execute(sql, val)
+        mydb.commit()
+        print(mycursor.rowcount, "record(s) deleted")
+        reg.delete(0, END)
+        name.delete(0, END)
+        reg.focus_set()
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+
+# GUI elements
+l1 = Label(win, text="Register no:", font="Times 12 bold", fg="red", bg="white")
+l1.place(x=50, y=50)
+l2 = Label(win, text="Name:", font="Times 12 bold", fg="red", bg="white")
+l2.place(x=50, y=100)
+
+reg = Entry(win)
+reg.place(x=150, y=50)
+name = Entry(win)
+name.place(x=150, y=100)
+
+b1 = Button(win, text="Save", bg="lightgreen", command=insert_data)
+b1.place(x=50, y=150)
+b2 = Button(win, text="Display", bg="lightgreen", command=show_data)
+b2.place(x=150, y=150)
+b3 = Button(win, text="Search", bg="lightgreen", command=search_data)
+b3.place(x=250, y=150)
+b4 = Button(win, text="Update", bg="lightgreen", command=edit_data)
+b4.place(x=100, y=200)
+b5 = Button(win, text="Delete", bg="lightgreen", command=delete_data)
+b5.place(x=200, y=200)
+
+win.mainloop()
+
+# Close MySQL connection when program ends
+mydb.close()
